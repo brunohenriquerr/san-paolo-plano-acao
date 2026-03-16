@@ -181,6 +181,12 @@ export default function SanPaoloBSC(){
   const[pag,setPag]=useState(1);
   const PER_PAGE=30;
 
+  // ── Seleção em lote ──
+  const[modoLote,setModoLote]=useState(false);
+  const[selecionados,setSelecionados]=useState([]);
+  const[statusLote,setStatusLote]=useState("Em andamento");
+  const[salvandoLote,setSalvandoLote]=useState(false);
+
   const carregarAcoes=useCallback(async()=>{
     setLoading(true);
     try{const data=await sbFetch("acoes?select=*&order=id.asc");setAcoes(data||[]);}
@@ -227,6 +233,32 @@ export default function SanPaoloBSC(){
     setObjetivoCor(prev=>({...prev,[nome]:cor}));
     setModalObjetivo(false);
     showToast(`Objetivo "${nome}" criado!`);
+  }
+
+  function toggleSelecao(id){
+    setSelecionados(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);
+  }
+  function toggleTodos(){
+    const idsPagina=paginadas.map(a=>a.id);
+    const todosSelecionados=idsPagina.every(id=>selecionados.includes(id));
+    if(todosSelecionados)setSelecionados(prev=>prev.filter(id=>!idsPagina.includes(id)));
+    else setSelecionados(prev=>[...new Set([...prev,...idsPagina])]);
+  }
+  function cancelarLote(){setModoLote(false);setSelecionados([]);}
+
+  async function aplicarLote(){
+    if(!selecionados.length)return;
+    setSalvandoLote(true);
+    try{
+      const progresso=statusLote==="Concluída"?100:statusLote==="A iniciar"?0:undefined;
+      const patch=progresso!==undefined?{status:statusLote,progresso}:{status:statusLote};
+      const ids=selecionados.join(",");
+      await sbFetch(`acoes?id=in.(${ids})`,{method:"PATCH",body:JSON.stringify(patch)});
+      setAcoes(prev=>prev.map(a=>selecionados.includes(a.id)?{...a,...patch}:a));
+      showToast(`${selecionados.length} tarefa${selecionados.length>1?"s":""} atualizada${selecionados.length>1?"s":""}!`);
+      cancelarLote();
+    }catch(e){showToast("Erro ao atualizar em lote","error");}
+    finally{setSalvandoLote(false);}
   }
 
   const stats=useMemo(()=>{
@@ -317,6 +349,7 @@ export default function SanPaoloBSC(){
             </div>
             <div style={{display:"flex",gap:8,marginLeft:"auto"}}>
               <button onClick={()=>setModalObjetivo(true)} style={{...btnSt,background:"#1e293b",color:"#94a3b8",border:"1px solid #334155"}}>+ Objetivo</button>
+              <button onClick={()=>{setModoLote(v=>!v);setSelecionados([]);}} style={{...btnSt,background:modoLote?"#1e3a5f":"#1e293b",color:modoLote?"#60a5fa":"#94a3b8",border:`1px solid ${modoLote?"#3b82f644":"#334155"}`}}>☑ Editar em Lote</button>
               <button onClick={()=>setModal("new")} style={{...btnSt,background:"linear-gradient(135deg,#ec4899,#f59e0b)",color:"#fff"}}>+ Nova Tarefa</button>
             </div>
           </div>
@@ -330,6 +363,28 @@ export default function SanPaoloBSC(){
 
         {!loading&&view==="lista"&&(
           <>
+            {/* BARRA DE LOTE */}
+            {modoLote&&(
+              <div style={{background:"#0d1f3c",border:"1px solid #3b82f644",borderRadius:12,padding:"12px 18px",marginBottom:12,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                <button onClick={toggleTodos} style={{...btnSt,padding:"5px 12px",background:"#1e293b",color:"#94a3b8",fontSize:12,border:"1px solid #334155"}}>
+                  {paginadas.every(a=>selecionados.includes(a.id))?"☑ Desmarcar página":"☐ Selecionar página"}
+                </button>
+                <span style={{fontSize:12,color:"#60a5fa",fontWeight:700}}>
+                  {selecionados.length} tarefa{selecionados.length!==1?"s":""} selecionada{selecionados.length!==1?"s":""}
+                </span>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginLeft:"auto",flexWrap:"wrap"}}>
+                  <span style={{fontSize:12,color:"#94a3b8"}}>Alterar status para:</span>
+                  <select value={statusLote} onChange={e=>setStatusLote(e.target.value)} style={{...inpSt,width:160,padding:"6px 10px"}}>
+                    {STATUS_OPTIONS.map(s=><option key={s}>{s}</option>)}
+                  </select>
+                  <button onClick={aplicarLote} disabled={!selecionados.length||salvandoLote}
+                    style={{...btnSt,background:selecionados.length?"#3b82f6":"#1e293b",color:"#fff",opacity:selecionados.length?1:0.4,padding:"7px 18px"}}>
+                    {salvandoLote?"Salvando...":"Aplicar"}
+                  </button>
+                  <button onClick={cancelarLote} style={{...btnSt,background:"transparent",color:"#64748b",fontSize:12}}>Cancelar</button>
+                </div>
+              </div>
+            )}
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
               {paginadas.map(a=>{
                 const cor=objetivoCor[(a.objetivo||"").trim()]||"#64748b";
@@ -337,9 +392,17 @@ export default function SanPaoloBSC(){
                 const dias=diasRestantes(a.prazo);
                 const atrasada=dias<0&&a.status!=="Concluída"&&a.status!=="Cancelada";
                 const prazoAlterado=a.prazo!==a.prazo_original&&a.prazo_original;
+                const selecionado=selecionados.includes(a.id);
                 return(
-                  <div key={a.id} style={{background:"#0f172a",borderRadius:10,border:`1px solid ${atrasada?"#ef444430":"#1e293b"}`,borderLeft:`3px solid ${cor}`,padding:"14px 18px"}}>
+                  <div key={a.id} style={{background:selecionado?"#0d1f3c":"#0f172a",borderRadius:10,border:`1px solid ${selecionado?"#3b82f655":atrasada?"#ef444430":"#1e293b"}`,borderLeft:`3px solid ${selecionado?"#3b82f6":cor}`,padding:"14px 18px",transition:"background 0.15s"}}>
                     <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
+                      {modoLote&&(
+                        <div onClick={()=>toggleSelecao(a.id)} style={{flexShrink:0,marginTop:2,cursor:"pointer"}}>
+                          <div style={{width:18,height:18,borderRadius:5,border:`2px solid ${selecionado?"#3b82f6":"#334155"}`,background:selecionado?"#3b82f6":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",transition:"all 0.15s"}}>
+                            {selecionado?"✓":""}
+                          </div>
+                        </div>
+                      )}
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap",marginBottom:3}}>
                           <span style={{fontSize:12,color:cor,fontWeight:700}}>{a.objetivo}</span>
@@ -366,8 +429,11 @@ export default function SanPaoloBSC(){
                         {a.obs&&<div style={{marginTop:6,fontSize:11,color:"#475569",fontStyle:"italic"}}>💬 {a.obs}</div>}
                       </div>
                       <div style={{display:"flex",gap:5,flexShrink:0}}>
-                        <button onClick={()=>setModal(a)} style={{...btnSt,padding:"5px 10px",background:"#1e293b",color:"#94a3b8",fontSize:12}} title="Editar">✎</button>
-                        <button onClick={()=>setConfirmarDelete(a)} style={{...btnSt,padding:"5px 10px",background:"#1a0a0a",color:"#ef444488",fontSize:12,border:"1px solid #ef444422"}} title="Excluir">🗑</button>
+                        {!modoLote&&<>
+                          <button onClick={()=>setModal(a)} style={{...btnSt,padding:"5px 10px",background:"#1e293b",color:"#94a3b8",fontSize:12}} title="Editar">✎</button>
+                          <button onClick={()=>setConfirmarDelete(a)} style={{...btnSt,padding:"5px 10px",background:"#1a0a0a",color:"#ef444488",fontSize:12,border:"1px solid #ef444422"}} title="Excluir">🗑</button>
+                        </>}
+                        {modoLote&&<button onClick={()=>toggleSelecao(a.id)} style={{...btnSt,padding:"5px 14px",background:selecionado?"#3b82f6":"#1e293b",color:selecionado?"#fff":"#64748b",fontSize:12,border:`1px solid ${selecionado?"#3b82f6":"#334155"}`}}>{selecionado?"✓ Selecionado":"Selecionar"}</button>}
                       </div>
                     </div>
                   </div>
