@@ -2,76 +2,38 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 
 const SUPABASE_URL = "https://sthgrllaqplnzbhyaeym.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0aGdybGxhcXBsbnpiaHlhZXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2Mjc5NjQsImV4cCI6MjA4OTIwMzk2NH0.ihquZkmQFUOjTpdmW5UY57Mks4xKPgOVWkRvJLc_BM4";
-const HEADERS = {
-  "apikey": SUPABASE_KEY,
-  "Authorization": `Bearer ${SUPABASE_KEY}`,
-  "Content-Type": "application/json",
-  "Prefer": "return=representation"
-};
+const HEADERS = {"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json","Prefer":"return=representation"};
 
-async function sbFetch(path, options = {}) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: HEADERS, ...options });
-  if (!res.ok) throw new Error(await res.text());
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
+async function sbFetch(path,options={}){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{headers:HEADERS,...options});
+  if(!res.ok)throw new Error(await res.text());
+  const text=await res.text();
+  return text?JSON.parse(text):null;
 }
 
-const OBJETIVOS_INICIAL = [
-  "Ampliar o alcance da marca e posicionamento do mercado",
-  "Aperfeiçoar o modelo de gestão orçamentária",
-  "Cultura San Paolo ATIVA",
-  "Estruturar controladoria do CMV",
-  "Implantar padronização do modelo operacional",
-  "Implantação Plano de Manutenção",
-  "Lideranças táticas com comportamento consistente de gestão de pessoas",
-  "Melhorar as causas do turnover",
-  "Melhorar faturamento dentro das Mesmas Lojas",
-  "Melhorar fidelidade e relacionamento com cliente",
-  "Revisão PCP"
-];
-
-const SETORES = ["Auditoria","Diretoria","Financeiro","Gerencia de Operações","Gerência das Regionais","Manutenção","Marketing","RH","Supervisão","Supply","TI"];
-const RESPONSAVEIS = ["Alexia","Analu","Arthur","Clara","David","Diretoria","Fabiano","Fábio","Gabriel","Gerência Regional","Ian","Ivna","João","Lanna","Limaverde","Lorrane","Meneses","Rafael","Rebeca","Renan","Renata","Rosiane","Stephane","Supervisor","Tarcila","Tifany","Valquíria","Vitória"];
-const STATUS_OPTIONS = ["A iniciar","Em andamento","Concluída","Atrasada","Cancelada"];
-const CORES = ["#ec4899","#10b981","#f59e0b","#ef4444","#3b82f6","#8b5cf6","#06b6d4","#f97316","#84cc16","#a855f7","#14b8a6","#e11d48","#0ea5e9","#d97706","#7c3aed","#059669","#dc2626","#2563eb"];
-
-const OBJETIVO_COR_INICIAL = {
-  "Ampliar o alcance da marca e posicionamento do mercado":"#ec4899",
-  "Aperfeiçoar o modelo de gestão orçamentária":"#10b981",
-  "Cultura San Paolo ATIVA":"#f59e0b",
-  "Estruturar controladoria do CMV":"#ef4444",
-  "Implantar padronização do modelo operacional":"#3b82f6",
-  "Implantação Plano de Manutenção":"#8b5cf6",
-  "Lideranças táticas com comportamento consistente de gestão de pessoas":"#06b6d4",
-  "Melhorar as causas do turnover":"#f97316",
-  "Melhorar faturamento dentro das Mesmas Lojas":"#84cc16",
-  "Melhorar fidelidade e relacionamento com cliente":"#a855f7",
-  "Revisão PCP":"#14b8a6"
-};
-
-const STATUS_META = {
-  "A iniciar":    {bg:"#1e293b",text:"#94a3b8",dot:"#475569"},
-  "Em andamento": {bg:"#1e3a5f",text:"#60a5fa",dot:"#3b82f6"},
-  "Concluída":    {bg:"#064e3b",text:"#34d399",dot:"#10b981"},
-  "Atrasada":     {bg:"#450a0a",text:"#f87171",dot:"#ef4444"},
-  "Cancelada":    {bg:"#1c1c1e",text:"#6b7280",dot:"#374151"},
-};
+const OBJETIVOS_INICIAL=["Ampliar o alcance da marca e posicionamento do mercado","Aperfeiçoar o modelo de gestão orçamentária","Cultura San Paolo ATIVA","Estruturar controladoria do CMV","Implantar padronização do modelo operacional","Implantação Plano de Manutenção","Lideranças táticas com comportamento consistente de gestão de pessoas","Melhorar as causas do turnover","Melhorar faturamento dentro das Mesmas Lojas","Melhorar fidelidade e relacionamento com cliente","Revisão PCP"];
+const SETORES_INICIAL=["Auditoria","Diretoria","Financeiro","Gerencia de Operações","Gerência das Regionais","Manutenção","Marketing","RH","Supervisão","Supply","TI"];
+const RESPONSAVEIS_INICIAL=["Alexia","Analu","Arthur","Clara","David","Diretoria","Fabiano","Fábio","Gabriel","Gerência Regional","Ian","Ivna","João","Lanna","Limaverde","Lorrane","Meneses","Rafael","Rebeca","Renan","Renata","Rosiane","Stephane","Supervisor","Tarcila","Tifany","Valquíria","Vitória"];
+const STATUS_OPTIONS=["A iniciar","Em andamento","Concluída","Atrasada","Cancelada"];
+const CORES=["#ec4899","#10b981","#f59e0b","#ef4444","#3b82f6","#8b5cf6","#06b6d4","#f97316","#84cc16","#a855f7","#14b8a6","#e11d48","#0ea5e9","#d97706","#7c3aed","#059669","#dc2626","#2563eb"];
+const OBJETIVO_COR_INICIAL={"Ampliar o alcance da marca e posicionamento do mercado":"#ec4899","Aperfeiçoar o modelo de gestão orçamentária":"#10b981","Cultura San Paolo ATIVA":"#f59e0b","Estruturar controladoria do CMV":"#ef4444","Implantar padronização do modelo operacional":"#3b82f6","Implantação Plano de Manutenção":"#8b5cf6","Lideranças táticas com comportamento consistente de gestão de pessoas":"#06b6d4","Melhorar as causas do turnover":"#f97316","Melhorar faturamento dentro das Mesmas Lojas":"#84cc16","Melhorar fidelidade e relacionamento com cliente":"#a855f7","Revisão PCP":"#14b8a6"};
+const STATUS_META={"A iniciar":{bg:"#1e293b",text:"#94a3b8",dot:"#475569"},"Em andamento":{bg:"#1e3a5f",text:"#60a5fa",dot:"#3b82f6"},"Concluída":{bg:"#064e3b",text:"#34d399",dot:"#10b981"},"Atrasada":{bg:"#450a0a",text:"#f87171",dot:"#ef4444"},"Cancelada":{bg:"#1c1c1e",text:"#6b7280",dot:"#374151"}};
 
 function fmtData(d){if(!d)return"—";const[y,m,dia]=d.split("-");return`${dia}/${m}/${y}`;}
 function diasRestantes(prazo){if(!prazo)return 999;return Math.ceil((new Date(prazo)-new Date())/86400000);}
+
+const inpSt={width:"100%",background:"#1e293b",border:"1px solid #334155",borderRadius:8,color:"#f1f5f9",padding:"8px 11px",fontSize:13,outline:"none",boxSizing:"border-box"};
+const btnSt={border:"none",borderRadius:8,padding:"8px 16px",fontSize:13,fontWeight:700,cursor:"pointer"};
+const lblSt={display:"block",color:"#94a3b8",fontSize:10,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:4};
 
 function ProgressBar({value,cor}){
   return <div style={{background:"#1e293b",borderRadius:99,height:5,width:"100%",overflow:"hidden"}}>
     <div style={{width:`${value||0}%`,height:"100%",borderRadius:99,background:value===100?"#10b981":(cor||"#3b82f6"),transition:"width 0.4s"}}/>
   </div>;
 }
-
 function Badge({label,cor,bg,small}){
-  return <span style={{background:bg,color:cor,border:`1px solid ${cor}30`,borderRadius:4,
-    padding:small?"2px 7px":"3px 10px",fontSize:small?10:11,fontWeight:700,
-    letterSpacing:"0.04em",textTransform:"uppercase",whiteSpace:"nowrap"}}>{label}</span>;
+  return <span style={{background:bg,color:cor,border:`1px solid ${cor}30`,borderRadius:4,padding:small?"2px 7px":"3px 10px",fontSize:small?10:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",whiteSpace:"nowrap"}}>{label}</span>;
 }
-
 function StatCard({label,value,sub,cor}){
   return <div style={{background:"#0f172a",border:`1px solid ${cor}33`,borderRadius:12,padding:"16px 20px",flex:1,minWidth:120}}>
     <div style={{color:"#64748b",fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:5}}>{label}</div>
@@ -79,7 +41,6 @@ function StatCard({label,value,sub,cor}){
     {sub&&<div style={{color:"#475569",fontSize:11,marginTop:4}}>{sub}</div>}
   </div>;
 }
-
 function Spinner(){
   return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"80px 0",gap:16}}>
     <div style={{width:36,height:36,borderRadius:"50%",border:"3px solid #1e293b",borderTop:"3px solid #3b82f6",animation:"spin 0.8s linear infinite"}}/>
@@ -88,10 +49,125 @@ function Spinner(){
   </div>;
 }
 
-const inpSt={width:"100%",background:"#1e293b",border:"1px solid #334155",borderRadius:8,color:"#f1f5f9",padding:"8px 11px",fontSize:13,outline:"none",boxSizing:"border-box"};
-const btnSt={border:"none",borderRadius:8,padding:"8px 16px",fontSize:13,fontWeight:700,cursor:"pointer"};
-const lblSt={display:"block",color:"#94a3b8",fontSize:10,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:4};
+// ─── MODAL CONFIGURAÇÕES ──────────────────────────────────────────────────────
+function ModalConfiguracoes({objetivos,objetivoCor,setores,responsaveis,onClose,onSave}){
+  const[aba,setAba]=useState("objetivos");
+  const[novoObjetivo,setNovoObjetivo]=useState("");
+  const[novaCor,setNovaCor]=useState(CORES[0]);
+  const[novoSetor,setNovoSetor]=useState("");
+  const[novoResp,setNovoResp]=useState("");
+  const[objLocal,setObjLocal]=useState([...objetivos]);
+  const[objCorLocal,setObjCorLocal]=useState({...objetivoCor});
+  const[setoresLocal,setSetoresLocal]=useState([...setores]);
+  const[respLocal,setRespLocal]=useState([...responsaveis]);
 
+  function addObjetivo(){
+    if(!novoObjetivo.trim())return;
+    setObjLocal(p=>[...p,novoObjetivo.trim()]);
+    setObjCorLocal(p=>({...p,[novoObjetivo.trim()]:novaCor}));
+    setNovoObjetivo("");
+  }
+  function removeObjetivo(obj){setObjLocal(p=>p.filter(x=>x!==obj));}
+  function addSetor(){if(!novoSetor.trim())return;setSetoresLocal(p=>[...p,novoSetor.trim()].sort());setNovoSetor("");}
+  function removeSetor(s){setSetoresLocal(p=>p.filter(x=>x!==s));}
+  function addResp(){if(!novoResp.trim())return;setRespLocal(p=>[...p,novoResp.trim()].sort());setNovoResp("");}
+  function removeResp(r){setRespLocal(p=>p.filter(x=>x!==r));}
+
+  const abas=[{id:"objetivos",label:"Objetivos",icon:"◈"},{id:"setores",label:"Setores",icon:"⊞"},{id:"responsaveis",label:"Responsáveis",icon:"👤"}];
+
+  return <div style={{position:"fixed",inset:0,background:"#000000bb",zIndex:1100,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
+    <div style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,width:"min(680px,96vw)",maxHeight:"88vh",display:"flex",flexDirection:"column"}} onClick={e=>e.stopPropagation()}>
+
+      {/* HEADER */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"20px 24px",borderBottom:"1px solid #1e293b"}}>
+        <div>
+          <div style={{fontSize:16,fontWeight:800,color:"#f1f5f9"}}>⚙ Configurações</div>
+          <div style={{fontSize:11,color:"#475569",marginTop:2}}>Gerencie objetivos, setores e responsáveis</div>
+        </div>
+        <button onClick={onClose} style={{...btnSt,background:"#1e293b",color:"#94a3b8",padding:"6px 12px"}}>✕</button>
+      </div>
+
+      {/* ABAS */}
+      <div style={{display:"flex",gap:4,padding:"12px 24px 0",borderBottom:"1px solid #1e293b"}}>
+        {abas.map(a=>(
+          <button key={a.id} onClick={()=>setAba(a.id)} style={{...btnSt,padding:"8px 16px",fontSize:12,background:"transparent",color:aba===a.id?"#60a5fa":"#64748b",borderBottom:aba===a.id?"2px solid #3b82f6":"2px solid transparent",borderRadius:0}}>
+            {a.icon} {a.label}
+          </button>
+        ))}
+      </div>
+
+      {/* CONTEÚDO */}
+      <div style={{flex:1,overflowY:"auto",padding:"20px 24px"}}>
+
+        {/* ABA OBJETIVOS */}
+        {aba==="objetivos"&&<>
+          <div style={{display:"flex",gap:8,marginBottom:16}}>
+            <input value={novoObjetivo} onChange={e=>setNovoObjetivo(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&addObjetivo()}
+              placeholder="Nome do novo objetivo..." style={{...inpSt,flex:1}}/>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              {CORES.map(c=><button key={c} onClick={()=>setNovaCor(c)} style={{width:22,height:22,borderRadius:5,background:c,border:"none",cursor:"pointer",outline:novaCor===c?"2px solid #fff":"2px solid transparent",outlineOffset:1,flexShrink:0}}/>)}
+            </div>
+            <button onClick={addObjetivo} style={{...btnSt,background:"#3b82f6",color:"#fff",whiteSpace:"nowrap"}}>+ Adicionar</button>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {objLocal.map(obj=>(
+              <div key={obj} style={{display:"flex",alignItems:"center",gap:10,background:"#0a0f1e",borderRadius:8,padding:"10px 14px",border:"1px solid #1e293b"}}>
+                <div style={{width:12,height:12,borderRadius:3,background:objCorLocal[obj]||"#64748b",flexShrink:0}}/>
+                <span style={{flex:1,fontSize:13,color:"#e2e8f0"}}>{obj}</span>
+                <button onClick={()=>removeObjetivo(obj)} style={{...btnSt,padding:"3px 10px",background:"#1a0a0a",color:"#ef444488",fontSize:11,border:"1px solid #ef444422"}}>Remover</button>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {/* ABA SETORES */}
+        {aba==="setores"&&<>
+          <div style={{display:"flex",gap:8,marginBottom:16}}>
+            <input value={novoSetor} onChange={e=>setNovoSetor(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&addSetor()}
+              placeholder="Nome do novo setor..." style={{...inpSt,flex:1}}/>
+            <button onClick={addSetor} style={{...btnSt,background:"#3b82f6",color:"#fff",whiteSpace:"nowrap"}}>+ Adicionar</button>
+          </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+            {setoresLocal.map(s=>(
+              <div key={s} style={{display:"flex",alignItems:"center",gap:6,background:"#0a0f1e",borderRadius:8,padding:"8px 12px",border:"1px solid #1e293b"}}>
+                <span style={{fontSize:13,color:"#e2e8f0"}}>{s}</span>
+                <button onClick={()=>removeSetor(s)} style={{border:"none",background:"transparent",color:"#ef444466",cursor:"pointer",fontSize:14,padding:0,lineHeight:1}}>✕</button>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {/* ABA RESPONSÁVEIS */}
+        {aba==="responsaveis"&&<>
+          <div style={{display:"flex",gap:8,marginBottom:16}}>
+            <input value={novoResp} onChange={e=>setNovoResp(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&addResp()}
+              placeholder="Nome do responsável..." style={{...inpSt,flex:1}}/>
+            <button onClick={addResp} style={{...btnSt,background:"#3b82f6",color:"#fff",whiteSpace:"nowrap"}}>+ Adicionar</button>
+          </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+            {respLocal.map(r=>(
+              <div key={r} style={{display:"flex",alignItems:"center",gap:6,background:"#0a0f1e",borderRadius:8,padding:"8px 12px",border:"1px solid #1e293b"}}>
+                <span style={{fontSize:13,color:"#e2e8f0"}}>{r}</span>
+                <button onClick={()=>removeResp(r)} style={{border:"none",background:"transparent",color:"#ef444466",cursor:"pointer",fontSize:14,padding:0,lineHeight:1}}>✕</button>
+              </div>
+            ))}
+          </div>
+        </>}
+      </div>
+
+      {/* FOOTER */}
+      <div style={{display:"flex",gap:10,justifyContent:"flex-end",padding:"16px 24px",borderTop:"1px solid #1e293b"}}>
+        <button onClick={onClose} style={{...btnSt,background:"#1e293b",color:"#94a3b8"}}>Cancelar</button>
+        <button onClick={()=>onSave(objLocal,objCorLocal,setoresLocal,respLocal)} style={{...btnSt,background:"linear-gradient(135deg,#3b82f6,#6366f1)",color:"#fff"}}>Salvar Configurações</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ─── MODAL OBJETIVO ───────────────────────────────────────────────────────────
 function ModalObjetivo({onSave,onClose}){
   const[nome,setNome]=useState("");
   const[cor,setCor]=useState(CORES[0]);
@@ -123,11 +199,10 @@ function ModalObjetivo({onSave,onClose}){
   </div>;
 }
 
-function Modal({acao,onSave,onClose,objetivos,saving}){
-  const lista=objetivos||OBJETIVOS_INICIAL;
-  const[form,setForm]=useState(acao||{objetivo:lista[0],iniciativa:"",tarefa:"",responsavel:RESPONSAVEIS[0],setor:SETORES[0],prazo_original:"",prazo:"",progresso:0,status:"A iniciar",obs:""});
+// ─── MODAL TAREFA ─────────────────────────────────────────────────────────────
+function Modal({acao,onSave,onClose,objetivos,setores,responsaveis,saving}){
+  const[form,setForm]=useState(acao||{objetivo:objetivos[0],iniciativa:"",tarefa:"",responsavel:responsaveis[0],setor:setores[0],prazo_original:"",prazo:"",progresso:0,status:"A iniciar",obs:""});
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
-
   const inp=(label,key,type="text",opts=null)=>(
     <div style={{marginBottom:12}}>
       <label style={lblSt}>{label}</label>
@@ -136,7 +211,6 @@ function Modal({acao,onSave,onClose,objetivos,saving}){
       :<input type={type} value={form[key]} onChange={e=>set(key,e.target.value)} style={inpSt}/>}
     </div>
   );
-
   return <div style={{position:"fixed",inset:0,background:"#000000bb",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onClose}>
     <div style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,padding:28,width:"min(640px,95vw)",maxHeight:"90vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
       <div style={{display:"flex",justifyContent:"space-between",marginBottom:20}}>
@@ -144,11 +218,11 @@ function Modal({acao,onSave,onClose,objetivos,saving}){
         <button onClick={onClose} style={btnSt}>✕</button>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 16px"}}>
-        <div style={{gridColumn:"1/-1"}}>{inp("Objetivo Estratégico","objetivo","text",lista)}</div>
+        <div style={{gridColumn:"1/-1"}}>{inp("Objetivo Estratégico","objetivo","text",objetivos)}</div>
         {inp("Iniciativa","iniciativa")}
-        {inp("Responsável","responsavel","text",RESPONSAVEIS)}
+        {inp("Responsável","responsavel","text",responsaveis)}
         <div style={{gridColumn:"1/-1"}}>{inp("Tarefa","tarefa","textarea")}</div>
-        {inp("Setor","setor","text",SETORES)}
+        {inp("Setor","setor","text",setores)}
         {inp("Status","status","text",STATUS_OPTIONS)}
         {inp("Prazo Original","prazo_original","date")}
         {inp("Prazo Atual","prazo","date")}
@@ -166,6 +240,7 @@ function Modal({acao,onSave,onClose,objetivos,saving}){
   </div>;
 }
 
+// ─── APP PRINCIPAL ────────────────────────────────────────────────────────────
 export default function SanPaoloBSC(){
   const[acoes,setAcoes]=useState([]);
   const[loading,setLoading]=useState(true);
@@ -173,15 +248,16 @@ export default function SanPaoloBSC(){
   const[toast,setToast]=useState(null);
   const[objetivos,setObjetivos]=useState(OBJETIVOS_INICIAL);
   const[objetivoCor,setObjetivoCor]=useState(OBJETIVO_COR_INICIAL);
+  const[setores,setSetores]=useState(SETORES_INICIAL);
+  const[responsaveis,setResponsaveis]=useState(RESPONSAVEIS_INICIAL);
   const[filtro,setFiltro]=useState({objetivo:"todos",setor:"todos",status:"todos",responsavel:"todos",busca:""});
   const[view,setView]=useState("lista");
   const[modal,setModal]=useState(null);
   const[modalObjetivo,setModalObjetivo]=useState(false);
+  const[modalConfig,setModalConfig]=useState(false);
   const[confirmarDelete,setConfirmarDelete]=useState(null);
   const[pag,setPag]=useState(1);
   const PER_PAGE=30;
-
-  // ── Seleção em lote ──
   const[modoLote,setModoLote]=useState(false);
   const[selecionados,setSelecionados]=useState([]);
   const[statusLote,setStatusLote]=useState("Em andamento");
@@ -193,7 +269,6 @@ export default function SanPaoloBSC(){
     catch(e){showToast("Erro ao carregar dados","error");}
     finally{setLoading(false);}
   },[]);
-
   useEffect(()=>{carregarAcoes();},[carregarAcoes]);
 
   function showToast(msg,type="success"){setToast({msg,type});setTimeout(()=>setToast(null),3000);}
@@ -235,17 +310,23 @@ export default function SanPaoloBSC(){
     showToast(`Objetivo "${nome}" criado!`);
   }
 
-  function toggleSelecao(id){
-    setSelecionados(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);
+  function salvarConfiguracoes(objList,objCores,setList,respList){
+    setObjetivos(objList);
+    setObjetivoCor(objCores);
+    setSetores(setList);
+    setResponsaveis(respList);
+    setModalConfig(false);
+    showToast("Configurações salvas!");
   }
+
+  function toggleSelecao(id){setSelecionados(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);}
   function toggleTodos(){
     const idsPagina=paginadas.map(a=>a.id);
-    const todosSelecionados=idsPagina.every(id=>selecionados.includes(id));
-    if(todosSelecionados)setSelecionados(prev=>prev.filter(id=>!idsPagina.includes(id)));
+    const todos=idsPagina.every(id=>selecionados.includes(id));
+    if(todos)setSelecionados(prev=>prev.filter(id=>!idsPagina.includes(id)));
     else setSelecionados(prev=>[...new Set([...prev,...idsPagina])]);
   }
   function cancelarLote(){setModoLote(false);setSelecionados([]);}
-
   async function aplicarLote(){
     if(!selecionados.length)return;
     setSalvandoLote(true);
@@ -264,14 +345,7 @@ export default function SanPaoloBSC(){
   const stats=useMemo(()=>{
     const total=acoes.length;
     if(!total)return{total:0,concluidas:0,emAnd:0,aIniciar:0,atrasadas:0,progMedio:0};
-    return{
-      total,
-      concluidas:acoes.filter(a=>a.status==="Concluída").length,
-      emAnd:acoes.filter(a=>a.status==="Em andamento").length,
-      aIniciar:acoes.filter(a=>a.status==="A iniciar").length,
-      atrasadas:acoes.filter(a=>a.status!=="Concluída"&&a.status!=="Cancelada"&&diasRestantes(a.prazo)<0).length,
-      progMedio:Math.round(acoes.reduce((s,a)=>s+(a.progresso||0),0)/total)
-    };
+    return{total,concluidas:acoes.filter(a=>a.status==="Concluída").length,emAnd:acoes.filter(a=>a.status==="Em andamento").length,aIniciar:acoes.filter(a=>a.status==="A iniciar").length,atrasadas:acoes.filter(a=>a.status!=="Concluída"&&a.status!=="Cancelada"&&diasRestantes(a.prazo)<0).length,progMedio:Math.round(acoes.reduce((s,a)=>s+(a.progresso||0),0)/total)};
   },[acoes]);
 
   const filtradas=useMemo(()=>acoes.filter(a=>{
@@ -297,6 +371,7 @@ export default function SanPaoloBSC(){
         {toast.type==="error"?"⚠ ":"✓ "}{toast.msg}
       </div>}
 
+      {/* HEADER */}
       <div style={{background:"#0a0f1e",borderBottom:"1px solid #1e293b",padding:"0 28px"}}>
         <div style={{maxWidth:1400,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
@@ -306,17 +381,19 @@ export default function SanPaoloBSC(){
               <div style={{fontSize:10,color:"#475569",fontWeight:500}}>Planejamento Estratégico · PWR Gestão</div>
             </div>
           </div>
-          <div style={{display:"flex",gap:5}}>
+          <div style={{display:"flex",gap:5,alignItems:"center"}}>
             {["lista","objetivos","setores"].map(v=>(
               <button key={v} onClick={()=>setView(v)} style={sel(v,view)}>
                 {v==="lista"?"☰ Lista":v==="objetivos"?"◈ Por Objetivo":"⊞ Por Setor"}
               </button>
             ))}
+            <button onClick={()=>setModalConfig(true)} style={{...btnSt,padding:"6px 13px",fontSize:11,background:"#1e293b",color:"#94a3b8",border:"1px solid #334155",marginLeft:8}} title="Configurações">⚙</button>
           </div>
         </div>
       </div>
 
       <div style={{maxWidth:1400,margin:"0 auto",padding:"24px 28px"}}>
+        {/* STATS */}
         <div style={{display:"flex",gap:12,marginBottom:24,flexWrap:"wrap"}}>
           <StatCard label="Total" value={stats.total} sub="tarefas ativas" cor="#3b82f6"/>
           <StatCard label="Concluídas" value={stats.concluidas} sub={`${stats.total?Math.round(stats.concluidas/stats.total*100):0}% do total`} cor="#10b981"/>
@@ -326,6 +403,7 @@ export default function SanPaoloBSC(){
           <StatCard label="Progresso Médio" value={`${stats.progMedio}%`} sub="consolidado" cor="#a855f7"/>
         </div>
 
+        {/* FILTROS */}
         <div style={{background:"#0a0f1e",border:"1px solid #1e293b",borderRadius:12,padding:"16px 18px",marginBottom:20}}>
           <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
             <input placeholder="Buscar tarefa, iniciativa, responsável..." value={filtro.busca} onChange={e=>setFiltroKey("busca",e.target.value)} style={{...inpSt,width:280,flex:"0 0 auto"}}/>
@@ -335,11 +413,11 @@ export default function SanPaoloBSC(){
             </select>
             <select value={filtro.setor} onChange={e=>setFiltroKey("setor",e.target.value)} style={{...inpSt,width:170}}>
               <option value="todos">Todos os setores</option>
-              {SETORES.map(s=><option key={s}>{s}</option>)}
+              {setores.map(s=><option key={s}>{s}</option>)}
             </select>
             <select value={filtro.responsavel} onChange={e=>setFiltroKey("responsavel",e.target.value)} style={{...inpSt,width:150}}>
               <option value="todos">Todos</option>
-              {RESPONSAVEIS.map(r=><option key={r}>{r}</option>)}
+              {responsaveis.map(r=><option key={r}>{r}</option>)}
             </select>
             <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
               {["todos",...STATUS_OPTIONS].map(s=>{
@@ -361,24 +439,21 @@ export default function SanPaoloBSC(){
 
         {loading&&<Spinner/>}
 
+        {/* VIEW LISTA */}
         {!loading&&view==="lista"&&(
           <>
-            {/* BARRA DE LOTE */}
             {modoLote&&(
               <div style={{background:"#0d1f3c",border:"1px solid #3b82f644",borderRadius:12,padding:"12px 18px",marginBottom:12,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
                 <button onClick={toggleTodos} style={{...btnSt,padding:"5px 12px",background:"#1e293b",color:"#94a3b8",fontSize:12,border:"1px solid #334155"}}>
                   {paginadas.every(a=>selecionados.includes(a.id))?"☑ Desmarcar página":"☐ Selecionar página"}
                 </button>
-                <span style={{fontSize:12,color:"#60a5fa",fontWeight:700}}>
-                  {selecionados.length} tarefa{selecionados.length!==1?"s":""} selecionada{selecionados.length!==1?"s":""}
-                </span>
+                <span style={{fontSize:12,color:"#60a5fa",fontWeight:700}}>{selecionados.length} tarefa{selecionados.length!==1?"s":""} selecionada{selecionados.length!==1?"s":""}</span>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginLeft:"auto",flexWrap:"wrap"}}>
                   <span style={{fontSize:12,color:"#94a3b8"}}>Alterar status para:</span>
                   <select value={statusLote} onChange={e=>setStatusLote(e.target.value)} style={{...inpSt,width:160,padding:"6px 10px"}}>
                     {STATUS_OPTIONS.map(s=><option key={s}>{s}</option>)}
                   </select>
-                  <button onClick={aplicarLote} disabled={!selecionados.length||salvandoLote}
-                    style={{...btnSt,background:selecionados.length?"#3b82f6":"#1e293b",color:"#fff",opacity:selecionados.length?1:0.4,padding:"7px 18px"}}>
+                  <button onClick={aplicarLote} disabled={!selecionados.length||salvandoLote} style={{...btnSt,background:selecionados.length?"#3b82f6":"#1e293b",color:"#fff",opacity:selecionados.length?1:0.4,padding:"7px 18px"}}>
                     {salvandoLote?"Salvando...":"Aplicar"}
                   </button>
                   <button onClick={cancelarLote} style={{...btnSt,background:"transparent",color:"#64748b",fontSize:12}}>Cancelar</button>
@@ -398,9 +473,7 @@ export default function SanPaoloBSC(){
                     <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
                       {modoLote&&(
                         <div onClick={()=>toggleSelecao(a.id)} style={{flexShrink:0,marginTop:2,cursor:"pointer"}}>
-                          <div style={{width:18,height:18,borderRadius:5,border:`2px solid ${selecionado?"#3b82f6":"#334155"}`,background:selecionado?"#3b82f6":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",transition:"all 0.15s"}}>
-                            {selecionado?"✓":""}
-                          </div>
+                          <div style={{width:18,height:18,borderRadius:5,border:`2px solid ${selecionado?"#3b82f6":"#334155"}`,background:selecionado?"#3b82f6":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",transition:"all 0.15s"}}>{selecionado?"✓":""}</div>
                         </div>
                       )}
                       <div style={{flex:1,minWidth:0}}>
@@ -454,6 +527,7 @@ export default function SanPaoloBSC(){
           </>
         )}
 
+        {/* VIEW OBJETIVOS */}
         {!loading&&view==="objetivos"&&(
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:18}}>
             {objetivos.map(obj=>{
@@ -502,9 +576,10 @@ export default function SanPaoloBSC(){
           </div>
         )}
 
+        {/* VIEW SETORES */}
         {!loading&&view==="setores"&&(
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
-            {SETORES.map(setor=>{
+            {setores.map(setor=>{
               const sAcoes=filtradas.filter(a=>a.setor===setor);
               if(!sAcoes.length)return null;
               const progMedio=Math.round(sAcoes.reduce((s,a)=>s+(a.progresso||0),0)/sAcoes.length);
@@ -534,8 +609,10 @@ export default function SanPaoloBSC(){
         )}
       </div>
 
-      {modal&&<Modal acao={modal==="new"?null:modal} onSave={salvar} onClose={()=>setModal(null)} objetivos={objetivos} saving={saving}/>}
+      {/* MODAIS */}
+      {modal&&<Modal acao={modal==="new"?null:modal} onSave={salvar} onClose={()=>setModal(null)} objetivos={objetivos} setores={setores} responsaveis={responsaveis} saving={saving}/>}
       {modalObjetivo&&<ModalObjetivo onSave={criarObjetivo} onClose={()=>setModalObjetivo(false)}/>}
+      {modalConfig&&<ModalConfiguracoes objetivos={objetivos} objetivoCor={objetivoCor} setores={setores} responsaveis={responsaveis} onClose={()=>setModalConfig(false)} onSave={salvarConfiguracoes}/>}
 
       {confirmarDelete&&(
         <div style={{position:"fixed",inset:0,background:"#000000cc",zIndex:1200,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setConfirmarDelete(null)}>
